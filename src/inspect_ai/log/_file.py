@@ -282,8 +282,9 @@ def read_eval_log(
           (defaults to 'auto' based on `log_file` extension).
        exclude_fields: Set of EvalSample field names to skip when loading
           samples (e.g. {"messages", "events", "store", "attachments"}).
-          Only applies to .eval format files. Has no effect when
-          header_only is True or when log_file is an IO[bytes] stream.
+          Memory benefits are only realised for .eval format logs (not .json logs).
+          Has no effect when header_only is True or when log_file is an IO[bytes]
+          stream.
 
     Returns:
        EvalLog object read from file.
@@ -324,8 +325,9 @@ async def read_eval_log_async(
           (defaults to 'auto' based on `log_file` extension).
        exclude_fields: Set of EvalSample field names to skip when loading
           samples (e.g. {"messages", "events", "store", "attachments"}).
-          Only applies to .eval format files. Has no effect when
-          header_only is True or when log_file is an IO[bytes] stream.
+          Memory benefits are only realised for .eval format logs (not .json logs).
+          Has no effect when header_only is True or when log_file is an IO[bytes]
+          stream.
 
     Returns:
        EvalLog object read from file.

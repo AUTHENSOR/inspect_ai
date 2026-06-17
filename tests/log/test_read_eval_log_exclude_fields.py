@@ -19,11 +19,30 @@ from inspect_ai.model._chat_message import ChatMessageUser
 from inspect_ai.scorer import Score
 
 EVAL_LOG_FILE = os.path.join("tests", "log", "test_eval_log", "log_read_sample.eval")
+JSON_LOG_FILE = os.path.join("tests", "log", "test_eval_log", "log_read_sample.json")
 
 
 def test_read_eval_log_exclude_fields_preserves_scores():
     log = read_eval_log(
         EVAL_LOG_FILE,
+        exclude_fields={"messages", "events", "store", "attachments"},
+    )
+    assert log.samples
+    sample = log.samples[0]
+    assert not sample.messages
+    assert not sample.events
+    assert not sample.store
+    assert not sample.attachments
+    assert sample.scores
+    score = sample.scores["match"]
+    assert score.value == "C"
+    assert score.answer == "Yes"
+
+
+def test_read_eval_log_exclude_fields_json_format_preserves_scores():
+    """exclude_fields excludes fields for .json logs too (without the memory win)."""
+    log = read_eval_log(
+        JSON_LOG_FILE,
         exclude_fields={"messages", "events", "store", "attachments"},
     )
     assert log.samples

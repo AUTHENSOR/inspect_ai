@@ -217,6 +217,9 @@ class JSONRecorder(FileRecorder):
                 raw_data = from_json(f.read())
             etag = None
 
+        if exclude_fields and not header_only:
+            _exclude_sample_fields(raw_data, exclude_fields)
+
         log = _parse_json_log(raw_data, header_only)
         log.location = location
         if etag:
@@ -318,6 +321,25 @@ class JSONRecorder(FileRecorder):
 def _validate_version(ver: int) -> None:
     if ver > LOG_SCHEMA_VERSION:
         raise ValueError(f"Unable to read version {ver} of log format.")
+
+
+def _exclude_sample_fields(raw_data: Any, exclude_fields: set[str]) -> None:
+    """Drop excluded top-level fields from each raw sample dict, in place.
+
+    Unlike the `.eval` streaming reader (which skips excluded fields during
+    parsing), this runs after the whole log has been materialised by
+    `from_json`, so there is no memory benefit -- it only makes field
+    exclusion behave consistently across log formats.
+    """
+    if not isinstance(raw_data, dict):
+        return
+    samples = raw_data.get("samples")
+    if not isinstance(samples, list):
+        return
+    for sample in samples:
+        if isinstance(sample, dict):
+            for field in exclude_fields:
+                sample.pop(field, None)
 
 
 def _parse_json_log(raw_data: Any, header_only: bool) -> EvalLog:
